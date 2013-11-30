@@ -15,16 +15,20 @@ module.exports = class Envelope extends Component
 
 	reset: (param) ->
 		unless param
-			return @reset param for param in @_connections
-		param.value = 0
-		param.setValueAtTime 0, @ctx.currentTime
+			for param in @_connections
+				@reset param
+		else
+			param.value = 0
+			param.setValueAtTime 0, @ctx.currentTime
 
 	cancel: (param) ->
 		unless param
-			return @cancel param for param in @_connections
-		now = @ctx.currentTime
-		param.cancelScheduledValues now
-		param.setValueAtTime param.value, now
+			for param in @_connections
+				@cancel param
+		else
+			now = @ctx.currentTime
+			param.cancelScheduledValues now
+			param.setValueAtTime param.value, now
 
 	trigger: (value=on) ->
 		now = @ctx.currentTime
@@ -34,6 +38,7 @@ module.exports = class Envelope extends Component
 				param.linearRampToValueAtTime 1, now + @options.attack
 				param.linearRampToValueAtTime @options.sustain, now + @options.attack + @options.decay
 			else if value is off
+				param.setValueAtTime @options.sustain, now
 				param.linearRampToValueAtTime 0, now + @options.release
 
 	initializeOutputs: ->

@@ -11,13 +11,12 @@ module.exports = class MonoOsc extends Generator
 		out: {}
 		modulation:
 			shape: 'triangle'
-			gain: 25
-			frequency: 6
+			gain: 0
+			frequency: 10
 		oscillator:
 			shape: 'triangle'
 			octave: 0
 			tune: 0
-			envelope: {}
 
 	initialize: ->
 		super
@@ -30,7 +29,6 @@ module.exports = class MonoOsc extends Generator
 		super
 		@_osc.set @options.oscillator
 		@_mod.set @options.modulation
-		@_mod.trigger on, @options.modulation.frequency
 
 	trigger: (note) ->
 		if note isnt off
@@ -40,6 +38,8 @@ module.exports = class MonoOsc extends Generator
 				 + (music.octaves @options.oscillator.octave) \
 				 + (@options.oscillator.tune)
 			@_osc.trigger on, freq
+			@_mod.trigger on, @options.modulation.frequency
 		else
 			@_osc.trigger off
+			@_mod.trigger off
 

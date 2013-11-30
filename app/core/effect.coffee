@@ -1,29 +1,30 @@
 Node = require 'core/node'
+Gain = require 'components/gain'
 
 
 module.exports = class Effect extends Node
 
-	connect: (target) ->
-		@output.connect target
+	defaults:
+		level: 1
+		gain: 1
+		wet: 1
 
-	create_master_gain: ->
-		@master_gain = @ctx.createGain()
-		@output = @master_gain
+	initialize: ->
+		@initializeInputs()
+		@initializeOutputs()
+		@_in = new Gain @ctx
+		@_out = new Gain @ctx
 
-	create_master_mix: ->
-		@master_gain = @ctx.createGain()
-		@output = @master_gain
+	initializeInputs: ->
+		@outputs.push
+			id:   'in'
+			node: => @_in.input().node()
 
-	trigger: (note) ->
-		@currentNote = note
+	initializeOutputs: ->
+		@outputs.push
+			id:   'out'
+			node: => @_out.output().node()
 
-	note: (note) ->
-		if match = NOTATION.exec note
-			[match, note, octave] = match
-			octave = (parseInt octave, 10) - 4
-			note = NOTES[note.toLowerCase()]
-			return (100 * note) + @octaves octave
-		else
-			no
-	hz: (cents) -> ROOT * Math.pow (Math.pow 2, 1/OCTAVE), cents
-	octaves: (oct) -> OCTAVE * oct
+	update: ->
+		@_in.set  gain:@options.level
+		@_out.set gain:@options.gain
