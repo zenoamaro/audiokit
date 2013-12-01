@@ -109,7 +109,7 @@ this.osc = new MonoOsc(ctx, {
       attack: .001,
       decay: .1,
       sustain: .2,
-      release: .05
+      release: 2
     }
   },
   modulation: {
@@ -144,7 +144,7 @@ music = require('core/music');
 
 Component = require('core/component');
 
-KILL_TIME = .001;
+KILL_TIME = .002;
 
 DECAY_SEEK_TIME = .1;
 
@@ -342,7 +342,7 @@ module.exports = Master = (function(_super) {
 });
 
 ;require.register("components/oscillator", function(exports, require, module) {
-var Component, Envelope, KILL_TIME, Oscillator, RELEASE_FALL_MUL, _ref,
+var Component, Envelope, KILL_TIME, MIN_RELEASE_TIME, Oscillator, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -350,9 +350,9 @@ Component = require('core/component');
 
 Envelope = require('components/envelope');
 
-KILL_TIME = .001;
+KILL_TIME = .002;
 
-RELEASE_FALL_MUL = 10;
+MIN_RELEASE_TIME = 2;
 
 module.exports = Oscillator = (function(_super) {
   __extends(Oscillator, _super);
@@ -411,7 +411,7 @@ module.exports = Oscillator = (function(_super) {
       return _this._osc = false;
     };
     clearTimeout(this._oscStopTimer);
-    return this._oscStopTimer = setTimeout(stop, (release * RELEASE_FALL_MUL) * 1000);
+    return this._oscStopTimer = setTimeout(stop, (Math.max(MIN_RELEASE_TIME, release)) * 1000);
   };
 
   Oscillator.prototype.trigger = function(state, freq) {
