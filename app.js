@@ -393,7 +393,7 @@ module.exports = Oscillator = (function(_super) {
       this._osc = this.ctx.createOscillator();
       this._osc.connect(this._amp);
       this._mod.connect(this._osc.detune);
-      this._osc.start();
+      this._osc.start(0);
     }
     return this._env.reset();
   };
@@ -407,7 +407,7 @@ module.exports = Oscillator = (function(_super) {
     stop = function() {
       _this._mod.disconnect(_this._osc.detune);
       _this._osc.disconnect(_this._amp);
-      _this._osc.stop();
+      _this._osc.stop(0);
       return _this._osc = false;
     };
     clearTimeout(this._oscStopTimer);
