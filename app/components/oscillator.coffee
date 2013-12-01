@@ -35,7 +35,7 @@ module.exports = class Oscillator extends Component
 			@_osc = @ctx.createOscillator()
 			@_osc.connect @_amp
 			@_mod.connect @_osc.detune
-			@_osc.start()
+			@_osc.start 0
 		@_env.reset()
 
 	stopOscillator: (release) ->
@@ -44,7 +44,7 @@ module.exports = class Oscillator extends Component
 		stop = =>
 			@_mod.disconnect @_osc.detune
 			@_osc.disconnect @_amp
-			@_osc.stop()
+			@_osc.stop 0
 			@_osc = no
 		clearTimeout @_oscStopTimer
 		@_oscStopTimer = setTimeout stop, (Math.max MIN_RELEASE_TIME, release) * 1000
