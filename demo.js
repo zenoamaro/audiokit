@@ -1,10 +1,10 @@
 ;(function(){
 
-	var Master = require 'components/master';
-	var MonoOsc = require 'generators/mono';
-	var Keyboard = require 'input/keyboard';
+	var Master = require('components/master');
+	var MonoOsc = require('generators/mono');
+	var Keyboard = require('input/keyboard');
 
-	window.ctx = new (AudioContext ? webkitAudioContext ? mozAudioContext ? msAudioContext);
+	window.ctx = new (AudioContext || webkitAudioContext || mozAudioContext || msAudioContext);
 	window.master = new Master(ctx);
 
 	window.osc = new MonoOsc(ctx, {
@@ -32,7 +32,7 @@
 	osc.connect({ to:master });
 
 
-	@keyboard = new Keyboard();
+	window.keyboard = new Keyboard();
 	keyboard.connect(osc);
 
 })();
