@@ -4,7 +4,10 @@
 	var MonoOsc = require('generators/mono');
 	var Keyboard = require('input/keyboard');
 
-	window.ctx = new (AudioContext || webkitAudioContext || mozAudioContext || msAudioContext);
+	window.ctx = new (  window.AudioContext
+	                 || window.webkitAudioContext
+	                 || window.mozAudioContext
+	                 || window.msAudioContext);
 	window.master = new Master(ctx);
 
 	window.osc = new MonoOsc(ctx, {
