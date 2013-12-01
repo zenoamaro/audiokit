@@ -22,6 +22,7 @@
     "docco-husky-brunch": "https://github.com/jcruz2us/docco-husky-brunch/tarball/master"
   },
   "devDependencies": {
+    "brunch": ">= 1.7 < 1.8",
     "auto-reload-brunch": ">= 1.0 < 1.8"
   }
 }
