@@ -7,16 +7,19 @@ Keyboard = require 'input/keyboard'
 
 @osc = new MonoOsc ctx,
 	oscillator:
+		shape: 'triangle'
+		octave: 0
 		envelope:
-			attack: .1
-			decay: .2
-			sustain: .2
+			attack: 1
+			decay: 1
+			sustain: .1
 			release: 1
 	modulation:
-		gain: 100
-		frequency: 10
+		gain: 10
+		frequency: 6
 		envelope:
-			attack: 3
+			attack: 1
+			decay: .5
 			sustain: 1
 			release: 1
 

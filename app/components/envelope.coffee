@@ -1,4 +1,8 @@
+music = require 'core/music'
 Component = require 'core/component'
+
+KILL_TIME = .01
+DECAY_SEEK_TIME = .1
 
 
 module.exports = class Envelope extends Component
@@ -18,8 +22,8 @@ module.exports = class Envelope extends Component
 			for param in @_connections
 				@reset param
 		else
-			param.value = 0
-			param.setValueAtTime 0, @ctx.currentTime
+			@cancel param
+			param.linearRampToValueAtTime 0, @ctx.currentTime + KILL_TIME
 
 	cancel: (param) ->
 		unless param
@@ -33,13 +37,17 @@ module.exports = class Envelope extends Component
 	trigger: (value=on) ->
 		now = @ctx.currentTime
 		for param in @_connections
-			@cancel param
 			if value is on
-				param.linearRampToValueAtTime 1, now + @options.attack
-				param.linearRampToValueAtTime @options.sustain, now + @options.attack + @options.decay
+				param.linearRampToValueAtTime 1, now + KILL_TIME + @options.attack
+				param.setTargetAtTime @options.sustain, now + KILL_TIME + @options.attack, @options.decay * music.EXP_FALL
 			else if value is off
-				param.setValueAtTime @options.sustain, now
-				param.linearRampToValueAtTime 0, now + @options.release
+				@cancel param
+				if param.value > @options.sustain
+					decay_seeker = Math.min(@options.decay, DECAY_SEEK_TIME)
+				else
+					decay_seeker = 0
+				param.setTargetAtTime @options.sustain, now, decay_seeker * music.EXP_FALL
+				param.setTargetAtTime 0, now + decay_seeker, @options.release * music.EXP_FALL
 
 	initializeOutputs: ->
 		@outputs.push

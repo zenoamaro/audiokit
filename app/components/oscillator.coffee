@@ -1,6 +1,8 @@
 Component = require 'core/component'
 Envelope = require 'components/envelope'
 
+KILL_TIME = .01
+
 
 module.exports = class Oscillator extends Component
 
@@ -20,60 +22,40 @@ module.exports = class Oscillator extends Component
 		@_amp = @ctx.createGain()
 		@_mod = @ctx.createGain()
 		@_env = new Envelope @ctx
-		@_env.reset()
+		@_amp.gain.value = 0
 		@_env.connect @_amp.gain
 		@_amp.connect @_out
 
 
-	initializeOscillator: ->
-		if @_osc_status is 'release'
-			@killOscillator()
+	startOscillator: ->
+		if @_osc
+			clearTimeout @_oscStopTimer
 		unless @_osc
-			@_mod.disconnect(); clearTimeout @_mod_stop_timer
-			@_env.disconnect(); clearTimeout @_env_stop_timer
 			@_osc = @ctx.createOscillator()
 			@_osc.connect @_amp
 			@_mod.connect @_osc.detune
 			@_osc.start()
 		@_env.reset()
 
-	disposeOscillator: (release) ->
-		if @_osc
-			# REVIEW: Is this a good way to disconnect the mod?
-			#         We need to dispose of all the stuff connected to the osc
-			@_osc_stop_timer = setTimeout (=> @killOscillator()), (release * 1000)
-			# @_mod_stop_timer = setTimeout (=> ((pin) => @_mod.disconnect pin))(@_osc.detune), (release * 1000)
-			# @_env_stop_timer = setTimeout (=> ((pin) => @_env.disconnect osc))(@_amp.gain), (release * 1000)
-			# NOTE: We don't disconnect outputs
-			#       as they will die by themselves, eventually
-			try
-				@_osc.stop @ctx.currentTime + release
-			catch ex
-				no
-			@_osc_status = 'release'
-
-	killOscillator: ->
-		@_env.reset()
-		@_mod.disconnect @_amp.gain; clearTimeout @_mod_stop_timer
-		if @_osc
-			@_env.disconnect @_osc.detune; clearTimeout @_env_stop_timer
-			@_osc.disconnect @_amp; clearTimeout @_osc_stop_timer
-			try
-				@_osc?.stop()
-			catch ex
-				no
-		@_osc = null
-		@_osc_status = null
-
+	stopOscillator: (release) ->
+		unless @_osc
+			return
+		stop = =>
+			@_mod.disconnect @_osc.detune
+			@_osc.disconnect @_amp
+			@_osc.stop()
+			@_osc = no
+		clearTimeout @_oscStopTimer
+		@_oscStopTimer = setTimeout stop, (release * 2000)
 
 	trigger: (state, freq) ->
 		if state is on
-			@initializeOscillator(); @update()
-			@_osc.frequency.setValueAtTime freq, @ctx.currentTime
+			@startOscillator(); @update()
+			@_osc.frequency.setValueAtTime freq, @ctx.currentTime + KILL_TIME
 			@_env.trigger on
 		else if state is off
 			@_env.trigger off
-			@disposeOscillator @_env.options.release
+			@stopOscillator @_env.options.release
 
 	update: ->
 		@_osc?.type = @options.shape
