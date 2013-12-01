@@ -20,26 +20,40 @@ module.exports = class MonoOsc extends Generator
 
 	initialize: ->
 		super
-		@_osc = new Oscillator @ctx
-		@_mod = new Oscillator @ctx
-		@_osc.connect to:@_out
-		@_mod.connect to:@_osc, toPin:'mod'
 
 	update: ->
 		super
-		@_osc.set @options.oscillator
-		@_mod.set @options.modulation
+		for note, nodes of @_notes
+			nodes.osc.set @options.oscillator
+			nodes.mod.set @options.modulation
 
-	trigger: (note) ->
-		if note isnt off
-			if _.isString note
-				note = music.hz music.note note
-			freq = note \
-				 + (music.octaves @options.oscillator.octave) \
-				 + (@options.oscillator.tune)
-			@_osc.trigger on, freq
-			@_mod.trigger on, @options.modulation.frequency
-		else
-			@_osc.trigger off
-			@_mod.trigger off
+	frequency: (note) ->
+		cents = (music.note note) \
+		      + (music.octaves @options.oscillator.octave) \
+		      + (@options.oscillator.tune)
+		return music.hz cents
+
+	noteOn: (note) ->
+		unless note of @_notes
+			@_notes[note] =
+				osc: osc = new Oscillator @ctx
+				mod: mod = new Oscillator @ctx
+			@update()
+			mod.trigger on, @options.modulation.frequency
+			osc.trigger on, @frequency note
+			mod.connect to:osc, toPin:'mod'
+			osc.connect to:@_out
+
+	noteOff: (note) ->
+		if block = @_notes[note]
+			{osc, mod} = block
+			osc.trigger off
+			mod.trigger off
+			delete @_notes[note]
+
+	trigger: (note, state) ->
+		if state is on
+			@noteOn note
+		else if state is off
+			@noteOff note
 

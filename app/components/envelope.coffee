@@ -1,7 +1,7 @@
 music = require 'core/music'
 Component = require 'core/component'
 
-KILL_TIME = .01
+KILL_TIME = .001
 DECAY_SEEK_TIME = .1
 
 

@@ -8,6 +8,7 @@ module.exports = class Generator extends Node
 		out: {}
 
 	initialize: ->
+		@_notes = {}
 		@initializeOutputs()
 		@_out = new Gain @ctx
 

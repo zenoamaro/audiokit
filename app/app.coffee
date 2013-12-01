@@ -8,18 +8,18 @@ Keyboard = require 'input/keyboard'
 @osc = new MonoOsc ctx,
 	oscillator:
 		shape: 'triangle'
-		octave: 0
+		octave: -2
 		envelope:
-			attack: 1
-			decay: 1
-			sustain: .1
-			release: 1
+			attack: .001
+			decay: .1
+			sustain: .2
+			release: .05
 	modulation:
-		gain: 10
+		gain: 40
 		frequency: 6
 		envelope:
-			attack: 1
-			decay: .5
+			attack: 2
+			decay: 0
 			sustain: 1
 			release: 1
 

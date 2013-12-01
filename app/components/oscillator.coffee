@@ -1,7 +1,8 @@
 Component = require 'core/component'
 Envelope = require 'components/envelope'
 
-KILL_TIME = .01
+KILL_TIME = .001
+RELEASE_FALL_MUL = 10
 
 
 module.exports = class Oscillator extends Component
@@ -10,10 +11,10 @@ module.exports = class Oscillator extends Component
 		shape: 'sine'
 		gain: 1
 		envelope:
-			attack: .01
+			attack: .001
 			decay: .1
 			sustain: .2
-			release: .01
+			release: .001
 
 	initialize: ->
 		@initializeInputs()
@@ -46,7 +47,7 @@ module.exports = class Oscillator extends Component
 			@_osc.stop()
 			@_osc = no
 		clearTimeout @_oscStopTimer
-		@_oscStopTimer = setTimeout stop, (release * 2000)
+		@_oscStopTimer = setTimeout stop, (release * RELEASE_FALL_MUL) * 1000
 
 	trigger: (state, freq) ->
 		if state is on
