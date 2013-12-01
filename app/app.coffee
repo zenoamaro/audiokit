@@ -13,7 +13,7 @@ Keyboard = require 'input/keyboard'
 			attack: .001
 			decay: .1
 			sustain: .2
-			release: .05
+			release: 2
 	modulation:
 		gain: 40
 		frequency: 6

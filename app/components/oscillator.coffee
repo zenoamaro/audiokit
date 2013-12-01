@@ -1,8 +1,8 @@
 Component = require 'core/component'
 Envelope = require 'components/envelope'
 
-KILL_TIME = .001
-RELEASE_FALL_MUL = 10
+KILL_TIME = .002
+MIN_RELEASE_TIME = 2 # FIXME: this should really not be hardcoded
 
 
 module.exports = class Oscillator extends Component
@@ -47,7 +47,7 @@ module.exports = class Oscillator extends Component
 			@_osc.stop()
 			@_osc = no
 		clearTimeout @_oscStopTimer
-		@_oscStopTimer = setTimeout stop, (release * RELEASE_FALL_MUL) * 1000
+		@_oscStopTimer = setTimeout stop, (Math.max MIN_RELEASE_TIME, release) * 1000
 
 	trigger: (state, freq) ->
 		if state is on
