@@ -7,6 +7,16 @@ MIN_RELEASE_TIME = 2 # FIXME: this should really not be hardcoded
 
 module.exports = class Oscillator extends Component
 
+	inputs:
+		mod:
+			label: 'Modulation'
+			source: -> @_mod
+
+	outputs:
+		out:
+			label: 'Output'
+			source: -> @_out
+
 	defaults:
 		shape: 'sine'
 		gain: 1
@@ -17,8 +27,6 @@ module.exports = class Oscillator extends Component
 			release: .001
 
 	initialize: ->
-		@initializeInputs()
-		@initializeOutputs()
 		@_out = @ctx.createGain()
 		@_amp = @ctx.createGain()
 		@_mod = @ctx.createGain()
@@ -62,16 +70,3 @@ module.exports = class Oscillator extends Component
 		@_osc?.type = @options.shape
 		@_env.set @options.envelope
 		@_out.gain.setValueAtTime @options.gain, @ctx.currentTime
-
-	initializeInputs: ->
-		@inputs.push
-			id: 'gain'
-			node: => @_amp.gain
-		@inputs.push
-			id: 'mod'
-			node: => @_mod
-
-	initializeOutputs: ->
-		@outputs.push
-			id: 'out'
-			node: => @_out

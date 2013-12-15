@@ -5,7 +5,7 @@ Keyboard = require 'input/keyboard'
 
 @ctx = new (AudioContext ? webkitAudioContext)
 
-@osc = new MonoOsc ctx,
+@oscA = new MonoOsc ctx,
 	oscillator:
 		shape: 'triangle'
 		octave: -2
@@ -13,7 +13,27 @@ Keyboard = require 'input/keyboard'
 			attack: .001
 			decay: .1
 			sustain: .2
-			release: 2
+			release: .01
+	modulation:
+		gain: 40
+		frequency: 6
+		envelope:
+			attack: 2
+			decay: 0
+			sustain: 1
+			release: 1
+
+@oscB = new MonoOsc ctx,
+	oscillator:
+		gain: 1
+		shape: 'triangle'
+		octave: -3
+		tune: 15
+		envelope:
+			attack: .001
+			decay: .1
+			sustain: .2
+			release: .01
 	modulation:
 		gain: 40
 		frequency: 6
@@ -25,5 +45,7 @@ Keyboard = require 'input/keyboard'
 
 @master = new Master ctx
 @keyboard = new Keyboard
-osc.connect to:master
-keyboard.connect osc
+oscA.outputs.out.connect master.inputs.in
+oscB.outputs.out.connect master.inputs.in
+keyboard.connect oscA
+keyboard.connect oscB

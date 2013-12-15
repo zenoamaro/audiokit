@@ -41,8 +41,8 @@ module.exports = class MonoOsc extends Generator
 			@update()
 			mod.trigger on, @options.modulation.frequency
 			osc.trigger on, @frequency note
-			mod.connect to:osc, toPin:'mod'
-			osc.connect to:@_out
+			mod.outputs.out.connect osc.inputs.mod
+			osc.outputs.out.connect @_out.inputs.in
 
 	noteOff: (note) ->
 		if block = @_notes[note]

@@ -4,18 +4,17 @@ Gain = require 'components/gain'
 
 module.exports = class Generator extends Node
 
+	outputs:
+		out:
+			label: 'Output'
+			source: -> @_out.outputs.out.getSource()
+
 	defaults:
 		out: {}
 
 	initialize: ->
 		@_notes = {}
-		@initializeOutputs()
 		@_out = new Gain @ctx
-
-	initializeOutputs: ->
-		@outputs.push
-			id:   'out'
-			node: => @_out.output().node()
 
 	update: ->
 		@_out.set @options.out

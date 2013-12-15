@@ -15,6 +15,7 @@ module.exports = class Envelope extends Component
 
 	initialize: ->
 		@_connections = []
+		@outputs = []
 		@initializeOutputs()
 
 	reset: (param) ->
@@ -59,4 +60,4 @@ module.exports = class Envelope extends Component
 		@reset param
 
 	disconnect: (param) ->
-		@_connections = _.without @_connections, (p) -> p is param
+		@_connections = _.without @_connections, param
