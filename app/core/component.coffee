@@ -1,33 +1,40 @@
+u = require 'utils'
 Class = require 'core/class'
-{InputPin, OutputPin} = require 'core/pins'
+{Pin, InputPin, OutputPin, Param} = require 'core/connections'
 
 
 module.exports = class Component extends Class
 
 	inputs: {}
 	outputs: {}
+	params: {}
 
 	constructor: (ctx, options) ->
 		@ctx = ctx
-		@preparePins()
 		super options
+		@preparePins()
+		@prepareConnections?()
+		@set options
 
 	preparePins: ->
-		for type in ['input', 'output']
-			property = "#{type}s"
+		pinTypes =
+			input: InputPin
+			output: OutputPin
+			param: Param
+
+		for type in _.keys pinTypes
 			pins = {}
+			property = "#{type}s"
+
 			for id, pin of @[property]
-				PinType = if type is 'input' then InputPin else OutputPin
-				pins[id] = new PinType
+				pins[id] = new pinTypes[pin.type or type]
 					id: id
-					type: type
 					label: pin.label
-					source: pin.source
 					parent: this
+					source: pin.source
+					default: pin.default
 			@[property] = pins
 
-	set: (options) ->
-		super
-		@update()
-
-	update: ->
+	set: (options={}) ->
+		for p, v of options
+			@params[p].value = v

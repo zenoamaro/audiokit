@@ -13,11 +13,11 @@ module.exports = class Gain extends Component
 			label: 'Output'
 			source: -> @_amp
 
-	defaults:
-		gain: 1
+	params:
+		gain:
+			label: 'Gain'
+			default: 1
+			source: -> @_amp.gain
 
 	initialize: (ctx, options) ->
 		@_amp = @ctx.createGain()
-
-	update: ->
-		@_amp.gain.value = @options.gain

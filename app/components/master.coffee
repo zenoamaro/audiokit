@@ -3,6 +3,5 @@ Gain = require 'components/gain'
 
 module.exports = class Master extends Gain
 
-	initialize: ->
-		super
+	prepareConnections: ->
 		@_amp.connect @ctx.destination

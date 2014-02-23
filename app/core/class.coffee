@@ -1,10 +1,9 @@
 module.exports = class Class
 
-	defaults: {}
-
 	constructor: (options) ->
+		@defaults ?= {}
+		@options ?= {}
 		@initialize?()
-		@set options
 
 	set: (options) ->
 		@options = $.extend yes, {}, @defaults, @options, options

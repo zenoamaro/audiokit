@@ -1,5 +1,8 @@
+u = require 'utils'
+debug = require 'utils/debug'
 Component = require 'core/component'
 Envelope = require 'components/envelope'
+Param = require 'core/connections/param'
 
 KILL_TIME = .002
 MIN_RELEASE_TIME = 2 # FIXME: this should really not be hardcoded
@@ -17,14 +20,37 @@ module.exports = class Oscillator extends Component
 			label: 'Output'
 			source: -> @_out
 
-	defaults:
-		shape: 'sine'
-		gain: 1
+	params:
 		envelope:
-			attack: .001
-			decay: .1
-			sustain: .2
-			release: .001
+			internal: yes
+			source: -> @_amp.gain
+		gain:
+			label: 'Gain'
+			default: 1
+			source: -> @_out.gain
+		frequency:
+			label: 'Frequency'
+			default: 0
+		detune:
+			label: 'Detune'
+			default: 0
+
+		attack:
+			label: 'Attack'
+			default: .1
+			source: -> @_env.params.attack
+		decay:
+			label: 'Decay'
+			default: .2
+			source: -> @_env.params.decay
+		sustain:
+			label: 'Sustain'
+			default: .2
+			source: -> @_env.params.sustain
+		release:
+			label: 'Release'
+			default: 1
+			source: -> @_env.params.release
 
 	initialize: ->
 		@_out = @ctx.createGain()
@@ -32,41 +58,49 @@ module.exports = class Oscillator extends Component
 		@_mod = @ctx.createGain()
 		@_env = new Envelope @ctx
 		@_amp.gain.value = 0
-		@_env.connect @_amp.gain
-		@_amp.connect @_out
 
+	prepareConnections: ->
+		@_env.outputs.target.connect @params.envelope
+		@_amp.connect @_out
 
 	startOscillator: ->
 		if @_osc
 			clearTimeout @_oscStopTimer
 		unless @_osc
+			debug.logComponent this, 'Start voice'
 			@_osc = @ctx.createOscillator()
 			@_osc.connect @_amp
 			@_mod.connect @_osc.detune
 			@_osc.start 0
+			for p in ['frequency', 'detune'] then do (p) =>
+				param = @["_osc_#{p}"] = new Param
+					id: "_osc_#{p}"
+					parent: this
+					internal: yes
+					source: => @_osc[p]
+				@params[p].connect param
 		@_env.reset()
 
 	stopOscillator: (release) ->
 		unless @_osc
 			return
-		stop = =>
-			@_mod.disconnect @_osc.detune
-			@_osc.disconnect @_amp
-			@_osc.stop 0
+		@_osc.onended = =>
+			debug.logComponent this, 'Stop voice'
+			for p in ['frequency', 'detune']
+				@["_osc_#{p}"].disconnect()
+			@_mod.disconnect()
+			@_osc.disconnect()
 			@_osc = no
-		clearTimeout @_oscStopTimer
-		@_oscStopTimer = setTimeout stop, (Math.max MIN_RELEASE_TIME, release) * 1000
+		@_osc.stop @ctx.currentTime + 1 + Math.max MIN_RELEASE_TIME, release
 
 	trigger: (state, freq) ->
+		debug.debugArguments arguments
+		debug.logNote state, this, freq
 		if state is on
-			@startOscillator(); @update()
-			@_osc.frequency.setValueAtTime freq, @ctx.currentTime + KILL_TIME
+			@startOscillator()
+			@_osc.type = 'sine'
+			@params.frequency.value = freq
 			@_env.trigger on
 		else if state is off
 			@_env.trigger off
-			@stopOscillator @_env.options.release
-
-	update: ->
-		@_osc?.type = @options.shape
-		@_env.set @options.envelope
-		@_out.gain.setValueAtTime @options.gain, @ctx.currentTime
+			@stopOscillator @params.release.value
